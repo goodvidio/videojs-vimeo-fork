@@ -37,8 +37,7 @@
   },
   "browserify-shim": {
     "qunit": "global:QUnit",
-    "sinon": "global:sinon",
-    "video.js": "global:videojs"
+    "sinon": "global:sinon"
   },
   "style": "dist/videojs-vimeo.css",
   "videojs-plugin": {
