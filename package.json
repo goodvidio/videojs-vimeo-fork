@@ -50,7 +50,8 @@
       "docs",
       "es5",
       "scripts",
-      "test/dist"
+      "test/dist",
+      "replace.js"
     ]
   },
   "files": [

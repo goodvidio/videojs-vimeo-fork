@@ -4,7 +4,7 @@ import VimeoPlayer from '@vimeo/player';
 const Component = videojs.getComponent('Component');
 const Tech = videojs.getComponent('Tech');
 let cssInjected = false;
-var _isOnMobile = videojs.browser.IS_IOS || videojs.browser.IS_ANDROID;
+const _isOnMobile = videojs.browser.IS_IOS || videojs.browser.IS_ANDROID;
 
 // Since the iframe can't be touched using Vimeo's way of embedding,
 // let's add a new styling rule to have the same style as `vjs-tech`
@@ -115,10 +115,7 @@ class Vimeo extends Tech {
       this._vimeoState.ended = true;
     });
     this._player.on('volumechange', (v) => this._vimeoState.volume = v);
-    this._player.on('error', e => {
-      this.trigger('error', e);
-      console.log(e);
-    });
+    this._player.on('error', e => this.trigger('error', e));
 
     this.triggerReady();
   }
@@ -197,9 +194,9 @@ class Vimeo extends Tech {
 
     delete this.errorNumber;
     this.source = source;
-      this.url = {
-        videoId: source.src.replace('https://vimeo.com/', '')
-      };
+    this.url = {
+      videoId: source.src.replace('https://vimeo.com/', '')
+    };
 
     if (this.options_.autoplay && !_isOnMobile) {
       if (this.isReady_) {
@@ -214,8 +211,7 @@ class Vimeo extends Tech {
           .then(() => {
             this._player.play();
             this._vimeoState.activeVideoId = this.url.videoId;
-          })
-          .catch(e => console.log(e));
+          });
       }
     }
   }
@@ -249,11 +245,10 @@ class Vimeo extends Tech {
       } else {
         this._player
           .loadVideo(this.url.videoId)
-          .then(function () {
+          .then(function() {
             this._vimeoState.activeVideoId = this.url.videoId;
             this._player.play();
-          }.bind(this))
-          .catch(e => console.log(e));
+          }.bind(this));
       }
     } else {
       this.trigger('waiting');

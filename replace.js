@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
 
-const filename = path.resolve(process.argv[2])
+const filename = path.resolve(process.argv[2]);
 
 const before = [`/**
  * videojs-vimeo
@@ -21,7 +21,7 @@ define(['exports', 'video.js', '@vimeo/player'], function (exports, _video, _pla
   exports.default = Vimeo;
 });
 },{}]},{},[1])(1)
-});`]
+});`];
 
 const after = [`(function (root, factory) {
   if(typeof define === 'function' && define.amd) {
@@ -34,11 +34,11 @@ const after = [`(function (root, factory) {
 }(this, function(_video, _player) {
   'use strict';`, `
   return Vimeo;
-}));`]
+}));`];
 
-let content = fs
+const content = fs
   .readFileSync(filename, 'utf8')
   .replace(before[0], after[0])
-  .replace(before[1], after[1])
+  .replace(before[1], after[1]);
 
-fs.writeFileSync(filename, content, 'utf8')
+fs.writeFileSync(filename, content, 'utf8');
