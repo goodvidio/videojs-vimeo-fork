@@ -321,7 +321,15 @@ Vimeo.nativeSourceHandler.handleSource = function(source, tech) {
 };
 
 // @note: Copied over from YouTube — not sure this is relevant
-Vimeo.nativeSourceHandler.dispose = function() { };
+Vimeo.nativeSourceHandler.dispose = function() {
+  this._player.unload();
+
+  this.el_.parentNode.className = this.el_.parentNode.className
+    .replace(' vjs-vimeo', '');
+  this.el_.parentNode.removeChild(this.el_);
+
+  Tech.prototype.dispose.call(this);
+};
 
 Vimeo.registerSourceHandler(Vimeo.nativeSourceHandler);
 
