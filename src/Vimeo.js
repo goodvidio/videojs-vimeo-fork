@@ -89,6 +89,13 @@ class Vimeo extends Tech {
 
     ['play', 'pause', 'ended', 'timeupdate', 'progress', 'seeked'].forEach(e => {
       this._player.on(e, (progress) => {
+
+        if (this._vimeoState.ended) {
+          if (e === 'pause' || e === 'progress') {
+            return;
+          }
+        }
+
         if (this._vimeoState.progress.duration !== progress.duration) {
           this.trigger('durationchange');
         }
