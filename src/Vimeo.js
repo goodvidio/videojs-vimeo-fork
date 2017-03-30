@@ -4,6 +4,7 @@ import VimeoPlayer from '@vimeo/player';
 const Component = videojs.getComponent('Component');
 const Tech = videojs.getComponent('Tech');
 let cssInjected = false;
+var _isOnMobile = videojs.browser.IS_IOS || videojs.browser.IS_ANDROID;
 
 // Since the iframe can't be touched using Vimeo's way of embedding,
 // let's add a new styling rule to have the same style as `vjs-tech`
@@ -124,6 +125,7 @@ class Vimeo extends Tech {
 
   initVimeoState() {
     const state = this._vimeoState = {
+      activeVideoId: this.url ? this.url.videoId : null,
       ended: false,
       playing: false,
       volume: 0,
@@ -152,6 +154,7 @@ class Vimeo extends Tech {
   }
 
   controls() {
+    // Vimeo doesn't provide a way to hide it's player's controls
     return true;
   }
 
@@ -159,17 +162,17 @@ class Vimeo extends Tech {
     return true;
   }
 
-  src() {
-    // @note: Not sure why this is needed but videojs requires it
-    return this.options_.source;
+  src(src) {
+    if (src) {
+      this.setSrc({src});
+    }
+
+    return this.source;
   }
 
   currentSrc() {
     return this.options_.source.src;
   }
-
-  // @note setSrc is used in other usecases (YouTube, Html) it doesn't seem required here
-  // setSrc() {}
 
   currentTime() {
     return this._vimeoState.progress.seconds;
@@ -185,6 +188,36 @@ class Vimeo extends Tech {
 
   setVolume(volume) {
     return this._player.setVolume(volume);
+  }
+
+  setSrc(source) {
+    if (!source || !source.src) {
+      return;
+    }
+
+    delete this.errorNumber;
+    this.source = source;
+      this.url = {
+        videoId: source.src.replace('https://vimeo.com/', '')
+      };
+
+    if (this.options_.autoplay && !_isOnMobile) {
+      if (this.isReady_) {
+        this.play();
+      } else {
+        this.playOnReady = true;
+      }
+    } else if (this._vimeoState.activeVideoId !== this.url.videoId) {
+      if (this.isReady_) {
+        this._player
+          .loadVideo(this.url.videoId)
+          .then(() => {
+            this._player.play();
+            this._vimeoState.activeVideoId = this.url.videoId;
+          })
+          .catch(e => console.log(e));
+      }
+    }
   }
 
   duration() {
@@ -206,7 +239,26 @@ class Vimeo extends Tech {
   }
 
   play() {
-    this._player.play();
+    if (!this.url || !this.url.videoId) {
+      return;
+    }
+
+    if (this.isReady_) {
+      if (this._vimeoState.activeVideoId === this.url.videoId) {
+        this._player.play();
+      } else {
+        this._player
+          .loadVideo(this.url.videoId)
+          .then(function () {
+            this._vimeoState.activeVideoId = this.url.videoId;
+            this._player.play();
+          }.bind(this))
+          .catch(e => console.log(e));
+      }
+    } else {
+      this.trigger('waiting');
+      this.playOnReady = true;
+    }
   }
 
   muted() {
