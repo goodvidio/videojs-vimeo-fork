@@ -114,7 +114,10 @@ class Vimeo extends Tech {
       this._vimeoState.ended = true;
     });
     this._player.on('volumechange', (v) => this._vimeoState.volume = v);
-    this._player.on('error', e => this.trigger('error', e));
+    this._player.on('error', e => {
+      this.trigger('error', e);
+      console.log(e);
+    });
 
     this.triggerReady();
   }
